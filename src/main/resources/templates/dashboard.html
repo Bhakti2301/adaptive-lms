@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 50px; }
+        .dashboard-container { max-width: 800px; margin: auto; }
+        .welcome-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .stat-item { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid #007bff; }
+        .recommendation-card { background: #334155; color: white; padding: 30px; border-radius: 15px; margin-top: 30px; }
+        .btn-light { display: inline-block; padding: 10px 20px; background: white; color: #334155; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="welcome-card">
+        <h1>Welcome Back, Learner! 👋</h1>
+        <p>Track your progress and continue your journey in <strong>Java Programming 101</strong>.</p>
+    </div>
+
+    <div th:if="${latestProgress}" class="stats-grid">
+        <div class="stat-item">
+            <small style="color: #666;">Last Quiz Score</small>
+            <h2 style="margin: 5px 0;" th:text="${latestProgress.lastScore} + '%'">0%</h2>
+        </div>
+        <div class="stat-item">
+            <small style="color: #666;">Current Status</small>
+            <h2 style="margin: 5px 0;">Active</h2>
+        </div>
+    </div>
+
+    <div th:if="${recommendation}" class="recommendation-card">
+        <h3 style="margin-top: 0; color: #94a3b8;">UP NEXT</h3>
+        <h2 th:text="${recommendation.title}">Lesson Title</h2>
+        <p th:text="${recommendation.content}"></p>
+        <a href="/lessons" class="btn-light">Start Lesson</a>
+    </div>
+
+    <div th:unless="${latestProgress}" class="welcome-card" style="text-align: center;">
+        <p>You haven't started any lessons yet!</p>
+        <a href="/lessons" class="btn-light" style="background: #007bff; color: white;">Explore Lessons</a>
+    </div>
+</div>
+</body>
+</html>

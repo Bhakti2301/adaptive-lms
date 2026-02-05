@@ -36,7 +36,7 @@
         <p th:text="${lesson.content}"></p>
 
         <hr>
-        <form action="/api/quiz/recommend" method="get">
+        <form action="/recommendation" method="get">
             <input type="hidden" name="courseId" th:value="${lesson.course.id}">
             <label>Enter Quiz Score (0-100):</label>
             <input type="number" name="score" min="0" max="100" required>

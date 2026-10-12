@@ -4,43 +4,172 @@
     <meta charset="UTF-8">
     <title>Student Dashboard</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 50px; }
-        .dashboard-container { max-width: 800px; margin: auto; }
-        .welcome-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .stat-item { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid #007bff; }
-        .recommendation-card { background: #334155; color: white; padding: 30px; border-radius: 15px; margin-top: 30px; }
-        .btn-light { display: inline-block; padding: 10px 20px; background: white; color: #334155; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 15px; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 30px;
+        }
+        .container {
+            max-width: 950px;
+            margin: auto;
+        }
+        .card {
+            background: white;
+            padding: 22px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 10px;
+            text-align: left;
+        }
+        .weak {
+            color: #b91c1c;
+        }
     </style>
 </head>
 <body>
-<div class="dashboard-container">
-    <div class="welcome-card">
-        <h1>Welcome Back, Learner! 👋</h1>
-        <p>Track your progress and continue your journey in <strong>Java Programming 101</strong>.</p>
+<div class="container">
+
+    <div style="text-align:right">
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+            <button type="submit">Logout</button>
+        </form>
     </div>
 
-    <div th:if="${latestProgress}" class="stats-grid">
-        <div class="stat-item">
-            <small style="color: #666;">Last Quiz Score</small>
-            <h2 style="margin: 5px 0;" th:text="${latestProgress.lastScore} + '%'">0%</h2>
+    <h1>
+        Welcome,
+        <span th:text="${currentUser.username}">Learner</span>
+    </h1>
+
+    <p>
+        Review your quiz performance and continue learning
+        at an appropriate difficulty.
+    </p>
+
+    <div class="card">
+        <h2>Latest attempt</h2>
+
+        <div th:if="${latestProgress != null}">
+            <p>
+                Latest raw score:
+                <strong th:text="${latestProgress.score} + '%'">70%</strong>
+            </p>
+            <p>
+                Composite score:
+                <strong th:text="${latestProgress.compositeScore}">
+                    70
+                </strong>
+            </p>
+            <p>
+                Topic:
+                <strong th:text="${latestProgress.quiz.lesson.topic.title}">
+                    Topic
+                </strong>
+            </p>
         </div>
-        <div class="stat-item">
-            <small style="color: #666;">Current Status</small>
-            <h2 style="margin: 5px 0;">Active</h2>
+
+        <div th:unless="${latestProgress != null}">
+            <p>You have not submitted a quiz score yet.</p>
         </div>
+
+        <p><a th:href="@{/lessons}">Browse lessons and quizzes</a></p>
     </div>
 
-    <div th:if="${recommendation}" class="recommendation-card">
-        <h3 style="margin-top: 0; color: #94a3b8;">UP NEXT</h3>
-        <h2 th:text="${recommendation.title}">Lesson Title</h2>
+    <div class="card">
+        <h2>Topic mastery</h2>
+        <p>
+            Average raw quiz score per topic is used as a simple
+            mastery indicator.
+        </p>
+
+        <div th:if="${topicMastery.isEmpty()}">
+            No topic scores available yet.
+        </div>
+
+        <table th:unless="${topicMastery.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Topic</th>
+                <th>Average score</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="entry : ${topicMastery}">
+                <td th:text="${entry.key}">Topic</td>
+                <td>
+                    <span th:text="${entry.value}">75</span>%
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2 class="weak">Topics needing attention</h2>
+
+        <div th:if="${weakTopics.isEmpty()}">
+            No weak topics identified yet, or not enough attempts
+            have been recorded.
+        </div>
+
+        <ul th:unless="${weakTopics.isEmpty()}">
+            <li th:each="entry : ${weakTopics}">
+                <span th:text="${entry.key}">Topic</span> —
+                average score
+                <span th:text="${entry.value}">45</span>%
+            </li>
+        </ul>
+
+        <p class="weak">
+            The current implementation flags topic averages
+            below 60% as weak.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Score trends and attempt history</h2>
+
+        <div th:if="${progressHistory.isEmpty()}">
+            Your attempt history will appear here.
+        </div>
+
+        <table th:unless="${progressHistory.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Topic</th>
+                <th>Quiz</th>
+                <th>Raw score</th>
+                <th>Composite</th>
+                <th>Completed at</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="attempt : ${progressHistory}">
+                <td th:text="${attempt.quiz.lesson.topic.title}">
+                    Topic
+                </td>
+                <td th:text="${attempt.quiz.title}">Quiz</td>
+                <td th:text="${attempt.score} + '%'">70%</td>
+                <td th:text="${attempt.compositeScore}">68</td>
+                <td th:text="${attempt.completedAt}">Timestamp</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" th:if="${recommendation != null}">
+        <h2>Recommended next lesson</h2>
+        <h3 th:text="${recommendation.title}">Lesson</h3>
         <p th:text="${recommendation.content}"></p>
-        <a href="/lessons" class="btn-light">Start Lesson</a>
-    </div>
-
-    <div th:unless="${latestProgress}" class="welcome-card" style="text-align: center;">
-        <p>You haven't started any lessons yet!</p>
-        <a href="/lessons" class="btn-light" style="background: #007bff; color: white;">Explore Lessons</a>
     </div>
 </div>
 </body>

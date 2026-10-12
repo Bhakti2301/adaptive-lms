@@ -4,46 +4,96 @@
     <meta charset="UTF-8">
     <title>Adaptive LMS - Lessons</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 40px; }
-        h1 { color: #333; text-align: center; }
-        .container { max-width: 800px; margin: auto; }
-        .lesson-card {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-left: 5px solid #007bff;
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            padding: 30px;
         }
-        .lesson-title { font-size: 1.5rem; color: #007bff; margin-top: 0; }
-        .difficulty-badge {
-            display: inline-block;
-            background: #e7f3ff;
-            color: #007bff;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+        .card {
+            background: white;
+            padding: 22px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #2563eb;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        .muted {
+            color: #64748b;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Your Learning Path</h1>
-    <div th:each="lesson : ${lessons}" class="lesson-card">
-        <div class="difficulty-badge">Level <span th:text="${lesson.difficultyLevel}"></span></div>
-        <h2 class="lesson-title" th:text="${lesson.title}">Lesson Title</h2>
-        <p th:text="${lesson.content}"></p>
+    <p class="muted">
+        Choose a lesson, submit a quiz score, and receive a
+        difficulty recommendation based on your topic history.
+    </p>
+
+    <p><a th:href="@{/dashboard}">Back to dashboard</a></p>
+
+    <div th:each="lesson : ${lessons}" class="card">
+        <p>
+            <strong>Topic:</strong>
+            <span th:text="${lesson.topic.title}">Topic</span>
+        </p>
+
+        <p>
+            <strong>Difficulty:</strong>
+            <span th:switch="${lesson.difficultyLevel}">
+                <span th:case="1">Easy</span>
+                <span th:case="2">Medium</span>
+                <span th:case="3">Hard</span>
+                <span th:case="*">Unspecified</span>
+            </span>
+        </p>
+
+        <h2 th:text="${lesson.title}">Lesson title</h2>
+        <p th:text="${lesson.content}">Lesson content</p>
 
         <hr>
-        <form action="/recommendation" method="get">
-            <input type="hidden" name="courseId" th:value="${lesson.course.id}">
-            <label>Enter Quiz Score (0-100):</label>
-            <input type="number" name="score" min="0" max="100" required>
-            <button type="submit" style="background:#007bff; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">
-                Get Next Recommendation
-            </button>
-        </form>
+
+        <h3>Available quizzes</h3>
+
+        <div th:if="${quizzesByLesson[lesson.id] == null
+                     or #lists.isEmpty(quizzesByLesson[lesson.id])}">
+            <p class="muted">
+                No quiz has been added to this lesson yet.
+            </p>
+        </div>
+
+        <div th:each="quiz : ${quizzesByLesson[lesson.id]}">
+            <h4 th:text="${quiz.title}">Quiz title</h4>
+            <p th:text="${quiz.description}"></p>
+
+            <form th:action="@{/recommendation}" method="post">
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+
+                <input type="hidden"
+                       name="quizId"
+                       th:value="${quiz.id}">
+
+                <label>Quiz score (0–100):</label>
+                <input type="number"
+                       name="score"
+                       min="0"
+                       max="100"
+                       required>
+
+                <button type="submit">
+                    Submit score and get recommendation
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 </body>

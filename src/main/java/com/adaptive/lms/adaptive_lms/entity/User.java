@@ -16,7 +16,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    private String role;
+    @Column(nullable = false)
+    private String role = "STUDENT";
 
     // Standard No-Args Constructor (Required by JPA)
     public User() {}

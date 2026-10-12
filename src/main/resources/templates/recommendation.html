@@ -4,27 +4,87 @@
     <meta charset="UTF-8">
     <title>Your Recommendation</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .result-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; max-width: 450px; border-top: 8px solid #28a745; }
-        .score-display { font-size: 3rem; font-weight: bold; color: #28a745; margin-bottom: 10px; }
-        .recommendation-box { background: #f0f9ff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #bae6fd; }
-        h2 { color: #0369a1; margin-top: 0; }
-        .btn { display: inline-block; padding: 12px 25px; background: #007bff; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.3s; }
-        .btn:hover { background: #0056b3; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f6;
+            padding: 35px;
+        }
+        .card {
+            background: white;
+            max-width: 600px;
+            margin: auto;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-<div class="result-card">
-    <p style="color: #666; margin-bottom: 5px;">Your Quiz Score</p>
-    <div class="score-display"><span th:text="${score}"></span>%</div>
+<div class="card">
+    <h1>Quiz Result</h1>
 
-    <div class="recommendation-box">
-        <p style="text-transform: uppercase; font-size: 0.75rem; font-weight: bold; color: #0369a1;">Recommended Next Lesson</p>
-        <h2 th:text="${lesson.title}">Lesson Title</h2>
-        <p th:text="${lesson.content}" style="color: #4b5563; font-size: 0.95rem;"></p>
+    <p>
+        Current quiz score:
+        <strong class="score"
+                th:text="${result.currentScore} + '%'">70%</strong>
+    </p>
+
+    <h2>Weighted score calculation</h2>
+
+    <p>
+        Historical average:
+        <strong th:text="${result.historicalAverage}">60</strong>
+    </p>
+
+    <p>
+        Total attempts on this topic:
+        <strong th:text="${result.attemptCount}">3</strong>
+    </p>
+
+    <p>
+        Retry-adjusted score:
+        <strong th:text="${result.adjustedScore}">50</strong>
+    </p>
+
+    <p>
+        Composite score:
+        <strong th:text="${result.compositeScore}">63</strong>
+    </p>
+
+    <p>
+        Target difficulty level:
+        <strong th:text="${result.recommendedDifficulty}">2</strong>
+    </p>
+
+    <hr>
+
+    <div th:if="${result.recommendedLesson != null}">
+        <h2>Recommended next lesson</h2>
+
+        <h3 th:text="${result.recommendedLesson.title}">
+            Lesson title
+        </h3>
+
+        <p th:text="${result.recommendedLesson.content}"></p>
     </div>
 
-    <a href="/lessons" class="btn">Continue Learning</a>
+    <div th:unless="${result.recommendedLesson != null}">
+        <h2>No matching lesson available</h2>
+        <p>
+            Add another lesson at the target difficulty for this
+            topic to enable the next recommendation.
+        </p>
+    </div>
+
+    <p>
+        <a th:href="@{/lessons}">Continue learning</a>
+        |
+        <a th:href="@{/dashboard}">View dashboard</a>
+    </p>
 </div>
 </body>
 </html>

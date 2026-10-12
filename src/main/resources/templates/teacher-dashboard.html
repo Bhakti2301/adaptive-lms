@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 25px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        input, textarea, select, button {
+            display: block;
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+            margin: 8px 0 14px;
+            padding: 9px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            text-align: left;
+            padding: 9px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .success {
+            color: #15803d;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div style="display:flex; justify-content:space-between">
+        <h1>Teacher Dashboard</h1>
+
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
+    <p>Manage learning content and review recorded performance.</p>
+
+    <p class="success"
+       th:if="${success != null}"
+       th:text="${success}"></p>
+
+    <div class="card">
+        <h2>Create course</h2>
+        <form th:action="@{/teacher/courses}" method="post">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+            <label>Course title</label>
+            <input type="text" name="title" required>
+
+            <label>Description</label>
+            <textarea name="description"></textarea>
+
+            <button type="submit">Create course</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Create topic</h2>
+        <form th:action="@{/teacher/topics}" method="post">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+            <label>Course</label>
+            <select name="courseId" required>
+                <option value="">Select course</option>
+                <option th:each="course : ${courses}"
+                        th:value="${course.id}"
+                        th:text="${course.title}">
+                </option>
+            </select>
+
+            <label>Topic title</label>
+            <input type="text" name="title" required>
+
+            <label>Description</label>
+            <textarea name="description"></textarea>
+
+            <button type="submit">Create topic</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Create lesson</h2>
+        <form th:action="@{/teacher/lessons}" method="post">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+            <label>Topic</label>
+            <select name="topicId" required>
+                <option value="">Select topic</option>
+                <option th:each="topic : ${topics}"
+                        th:value="${topic.id}"
+                        th:text="${topic.title + ' — '
+                                  + topic.course.title}">
+                </option>
+            </select>
+
+            <label>Lesson title</label>
+            <input type="text" name="title" required>
+
+            <label>Lesson content</label>
+            <textarea name="content" required></textarea>
+
+            <label>Difficulty</label>
+            <select name="difficultyLevel" required>
+                <option value="1">Easy</option>
+                <option value="2">Medium</option>
+                <option value="3">Hard</option>
+            </select>
+
+            <button type="submit">Create lesson</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Create quiz</h2>
+        <form th:action="@{/teacher/quizzes}" method="post">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+            <label>Lesson</label>
+            <select name="lessonId" required>
+                <option value="">Select lesson</option>
+                <option th:each="lesson : ${lessons}"
+                        th:value="${lesson.id}"
+                        th:text="${lesson.title + ' — '
+                                  + lesson.topic.title}">
+                </option>
+            </select>
+
+            <label>Quiz title</label>
+            <input type="text" name="title" required>
+
+            <label>Description</label>
+            <textarea name="description"></textarea>
+
+            <button type="submit">Create quiz</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Recorded student attempts</h2>
+
+        <div th:if="${progressHistory.isEmpty()}">
+            No quiz attempts have been recorded yet.
+        </div>
+
+        <table th:unless="${progressHistory.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Student</th>
+                <th>Topic</th>
+                <th>Quiz</th>
+                <th>Score</th>
+                <th>Composite</th>
+                <th>Timestamp</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="attempt : ${progressHistory}">
+                <td th:text="${attempt.user.username}">Student</td>
+                <td th:text="${attempt.quiz.lesson.topic.title}">
+                    Topic
+                </td>
+                <td th:text="${attempt.quiz.title}">Quiz</td>
+                <td th:text="${attempt.score} + '%'">70%</td>
+                <td th:text="${attempt.compositeScore}">68</td>
+                <td th:text="${attempt.completedAt}">Timestamp</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

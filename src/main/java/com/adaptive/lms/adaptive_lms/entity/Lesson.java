@@ -3,38 +3,70 @@ package com.adaptive.lms.adaptive_lms.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "lessons")
+@Table(
+    name = "lessons",
+    indexes = {
+        @Index(
+            name = "idx_lesson_topic_difficulty",
+            columnList = "topic_id, difficulty_level"
+        )
+    }
+)
 public class Lesson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    // This is key for the "Adaptive" part: 1 = Easy, 2 = Medium, 3 = Hard
+    // 1 = Easy, 2 = Medium, 3 = Hard
+    @Column(name = "difficulty_level", nullable = false)
     private int difficultyLevel;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "topic_id", nullable = false)
+    private Topic topic;
 
     public Lesson() {}
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public int getDifficultyLevel() { return difficultyLevel; }
-    public void setDifficultyLevel(int difficultyLevel) { this.difficultyLevel = difficultyLevel; }
+    public String getContent() {
+        return content;
+    }
 
-    public Course getCourse() { return course; }
-    public void setCourse(Course course) { this.course = course; }
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public int getDifficultyLevel() {
+        return difficultyLevel;
+    }
+
+    public void setDifficultyLevel(int difficultyLevel) {
+        this.difficultyLevel = difficultyLevel;
+    }
+
+    public Topic getTopic() {
+        return topic;
+    }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
+    }
 }
